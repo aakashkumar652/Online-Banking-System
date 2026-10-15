@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexTrust - Online Banking System</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Chart.js for Operational Metrics and Financial Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Demo / Role Switching Bar -->
+  <div class="top-role-bar">
+    <div class="system-brand-badge">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <span>ApexTrust CoreBanking Enterprise</span>
+      <span style="font-size: 0.72rem; opacity: 0.7; margin-left: 8px;">v4.12 • Secure SSL 256-Bit</span>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span style="font-size: 0.8rem; color: #94a3b8;">Active Role:</span>
+      <div class="role-pill-switch">
+        <button id="roleBtnCustomer" class="role-pill-btn active" onclick="switchRole('customer')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          Customer Portal
+        </button>
+        <button id="roleBtnAdmin" class="role-pill-btn" onclick="switchRole('admin')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h10"/>
+          </svg>
+          Admin Portal
+        </button>
+      </div>
+
+      <button class="btn btn-secondary btn-sm" onclick="resetDatabaseDemo()" title="Reset mock data to initial demo state" style="padding: 3px 10px; font-size: 0.75rem; background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2);">
+        Reset Demo
+      </button>
+      <a href="login.html" style="padding: 3px 10px; font-size: 0.75rem; background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+        Logout
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="main-header">
+    <div class="container header-content">
+      <a href="#" class="brand-logo" onclick="return false;">
+        <div class="logo-icon">AT</div>
+        <div class="logo-text">
+          <h1 id="headerBankTitle">ApexTrust Bank</h1>
+          <span>Commercial & Retail Banking</span>
+        </div>
+      </a>
+
+      <!-- Current Portal Identifier Badge -->
+      <div id="portalModeBadge" style="display: flex; align-items: center; gap: 8px; background: #eff6ff; padding: 6px 14px; border-radius: 9999px; border: 1px solid #bfdbfe; font-size: 0.82rem; font-weight: 700; color: #1e40af;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></span>
+        <span id="portalBadgeText">Customer Banking Dashboard</span>
+      </div>
+
+      <!-- User Profile in Header -->
+      <div class="header-actions">
+        <div class="user-badge-profile" id="userProfileBadge">
+          <div class="user-avatar-circle" id="userAvatar">AS</div>
+          <div class="user-meta-text">
+            <span class="user-name" id="userDisplayName">Aakash Sharma</span>
+            <span class="user-role-label" id="userDisplayRole">Customer • #1029384756</span>
+          </div>
+        </div>
+        
+        <button class="btn-icon" title="Quick Switch User" onclick="openLoginModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Secondary Navigation Subbar (Changes dynamically based on role) -->
+  <nav class="dashboard-navigation">
+    <div class="container">
+      
+      <!-- Customer Tabs -->
+      <div id="customerNavTabs" class="nav-tabs-wrapper">
+        <button class="nav-tab-btn active" onclick="showCustomerTab('account-overview')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
+          </svg>
+          Account Overview
+        </button>
+        <button class="nav-tab-btn" onclick="showCustomerTab('perform-transaction')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>
+          </svg>
+          Perform Transactions
+        </button>
+        <button class="nav-tab-btn" onclick="showCustomerTab('transaction-history')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Transaction History
+        </button>
+        <button class="nav-tab-btn" onclick="showCustomerTab('banking-services')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/>
+          </svg>
+          Banking Services
+          <span class="nav-tab-badge">Loans & FDs</span>
+        </button>
+        <button class="nav-tab-btn" onclick="showCustomerTab('profile-management')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          Profile Management
+        </button>
+      </div>
+
+      <!-- Admin Tabs -->
+      <div id="adminNavTabs" class="nav-tabs-wrapper" style="display: none;">
+        <button class="nav-tab-btn active" onclick="showAdminTab('admin-metrics')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/>
+          </svg>
+          Operational Metrics
+        </button>
+        <button class="nav-tab-btn" onclick="showAdminTab('admin-users')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          User Management
+        </button>
+        <button class="nav-tab-btn" onclick="showAdminTab('admin-transactions')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 12h20"/><path d="M20 12l-4-4"/><path d="M20 12l-4 4"/><circle cx="12" cy="12" r="10"/>
+          </svg>
+          Transaction Monitoring
+        </button>
+        <button class="nav-tab-btn" onclick="showAdminTab('admin-settings')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          System Settings
+        </button>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- =========================================================================
+       MAIN CONTENT CONTAINER
+       ========================================================================= -->
+  <main class="main-viewport container">
+
+    <!-- System Maintenance Notice (Hidden unless enabled) -->
+    <div id="maintenanceAlert" style="display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem; color: #991b1b; align-items: center; justify-content: space-between;">
+      <div class="flex items-center gap-3">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>
+        </svg>
+        <div>
+          <strong style="display: block;">Core Banking Maintenance Mode is ACTIVE</strong>
+          <span style="font-size: 0.85rem;" id="maintenanceMsgText">Only administrative procedures are enabled. Non-critical outward payments are queued.</span>
+        </div>
+      </div>
+      <button class="btn btn-sm btn-secondary" onclick="switchRole('admin'); showAdminTab('admin-settings');">Adjust in Settings</button>
+    </div>
+
+    <!-- ***********************************************************************
+         CUSTOMER VIEWS
+         *********************************************************************** -->
+
+    <!-- CUSTOMER VIEW 1: ACCOUNT OVERVIEW -->
+    <section id="view-account-overview" class="view-section active">
+      <div class="section-headline">
+        <div class="headline-text">
+          <h2>Welcome back, <span id="welcomeUserName">Aakash</span> 👋</h2>
+          <p>Here is your real-time banking summary and active deposit portfolios.</p>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-primary" onclick="showCustomerTab('perform-transaction')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/>
+            </svg>
+            Send Money
+          </button>
+          <button class="btn btn-secondary" onclick="openDepositModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+            Deposit Funds
+          </button>
+        </div>
+      </div>
+
+      <!-- Account Balances Row -->
+      <div class="accounts-grid" id="customerAccountsGrid">
+        <!-- Rendered dynamically via JS -->
+      </div>
+
+      <!-- Virtual Card & Financial Breakdown Row -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        
+        <!-- Virtual Debit Card -->
+        <div class="card" style="padding: 1.25rem;">
+          <div class="card-title-bar" style="margin-bottom: 1rem;">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
+              </svg>
+              Apex Platinum Debit Card
+            </h3>
+            <span class="badge badge-active" id="cardStatusBadge">Active</span>
+          </div>
+
+          <div class="virtual-card-wrapper" id="virtualCardDisplay">
+            <div class="card-chip-row">
+              <div class="chip-graphic"></div>
+              <div class="card-type-logo">VISA INFINITE</div>
+            </div>
+            <div class="card-number-display">
+              <span id="maskedCardNumber">4532 •••• •••• 8821</span>
+              <button onclick="toggleCardNumberVisibility()" style="background: none; border: none; color: #fff; cursor: pointer; opacity: 0.8;" title="Reveal card digits">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="card-footer-info">
+              <div>
+                <div class="card-holder-label">Cardholder</div>
+                <div class="card-holder-name" id="cardHolderNameDisplay">AAKASH SHARMA</div>
+              </div>
+              <div style="text-align: right;">
+                <div class="card-holder-label">Expires / CVV</div>
+                <div class="card-expiry-val" id="cardExpiryDisplay">08/28 • CVV: <span id="cardCvvDisplay">•••</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+            <div style="font-size: 0.82rem; color: var(--text-muted);">
+              Instant Card Security:
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="toggleCardLock()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <span id="cardLockBtnText">Lock Card</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Financial Summary / Monthly Velocity -->
+        <div class="card">
+          <div class="card-title-bar">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/>
+              </svg>
+              Monthly Cash Flow Summary
+            </h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">October 2026</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background: var(--success-bg); border: 1px solid #bbf7d0; border-radius: var(--radius-md); padding: 1rem;">
+              <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #16a34a;">Money In (Credits)</span>
+              <div style="font-size: 1.4rem; font-weight: 800; color: #15803d; margin-top: 4px;">+$6,373.25</div>
+              <span style="font-size: 0.72rem; color: #16a34a;">Salary & savings interest</span>
+            </div>
+            <div style="background: var(--danger-bg); border: 1px solid #fecaca; border-radius: var(--radius-md); padding: 1rem;">
+              <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #dc2626;">Money Out (Debits)</span>
+              <div style="font-size: 1.4rem; font-weight: 800; color: #b91c1c; margin-top: 4px;">-$4,784.44</div>
+              <span style="font-size: 0.72rem; color: #dc2626;">Transfers & utilities</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between" style="font-size: 0.82rem; margin-bottom: 6px;">
+              <span style="font-weight: 600;">Monthly Spending Limit Usage</span>
+              <span style="font-weight: 700; color: var(--primary);">28.5% ($14,215.56 left)</span>
+            </div>
+            <div style="background: #e2e8f0; height: 8px; border-radius: 9999px; overflow: hidden;">
+              <div style="background: linear-gradient(90deg, #3b82f6, #10b981); height: 100%; width: 28.5%;"></div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="showCustomerTab('transaction-history')">
+              View Detailed Statements
+            </button>
+            <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="showCustomerTab('banking-services')">
+              Explore Wealth Services
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Recent Transactions Preview -->
+      <div class="card">
+        <div class="card-title-bar">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Recent Account Activity
+          </h3>
+          <button class="btn btn-secondary btn-sm" onclick="showCustomerTab('transaction-history')">
+            See All Transactions →
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Date & Time</th>
+                <th>Description / Party</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th style="text-align: right;">Amount</th>
+                <th style="text-align: center;">Receipt</th>
+              </tr>
+            </thead>
+            <tbody id="overviewRecentTxTable">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUSTOMER VIEW 2: PERFORM TRANSACTIONS -->
+    <section id="view-perform-transaction" class="view-section">
+      <div class="section-headline">
+        <div class="headline-text">
+          <h2>Perform a Funds Transfer 💸</h2>
+          <p>Send money securely via Instant IMPS, NEFT, RTGS, or Internal Bank Transfer.</p>
+        </div>
+        <div style="background: #f1f5f9; padding: 6px 14px; border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">
+          Available Checking Balance: <strong style="color: var(--primary);" id="transferSourceBalance">$14,250.75</strong>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
+        
+        <!-- Transfer Form -->
+        <div class="card">
+          <form id="transferForm" onsubmit="handleTransferSubmit(event)">
+            
+            <div class="form-group">
+              <label class="form-label" for="txTransferType">Transfer Method / Network</label>
+              <select id="txTransferType" class="form-control" onchange="updateTransferFeeNotice()">
+                <option value="IMPS Fast Transfer">⚡ Instant IMPS (Real-Time 24x7 - Zero Fee)</option>
+                <option value="NEFT Transfer">🏦 National NEFT (Batch Settlement - Zero Fee)</option>
+                <option value="RTGS High-Value">🏛️ RTGS Express (High Value Real-Time)</option>
+                <option value="Internal Transfer">🔁 Intra-ApexTrust Internal Transfer</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="txRecipientAccount">Recipient Account Number *</label>
+                <input type="text" id="txRecipientAccount" class="form-control" placeholder="e.g. 5544332211" required maxlength="16">
+                <span class="form-hint">10 to 16-digit bank account number</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="txRecipientIfsc">IFSC / Routing Code</label>
+                <input type="text" id="txRecipientIfsc" class="form-control" placeholder="e.g. APEX000123" value="APEX000844">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="txRecipientName">Beneficiary Full Name *</label>
+              <input type="text" id="txRecipientName" class="form-control" placeholder="e.g. David Miller" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="txAmount">Transfer Amount ($) *</label>
+                <input type="number" id="txAmount" class="form-control" placeholder="0.00" min="1" max="50000" step="0.01" required oninput="calculateTransferTotals()">
+                <span class="form-hint">Daily Per-Tx Limit: $15,000.00</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="txCategory">Expense Category</label>
+                <select id="txCategory" class="form-control">
+                  <option value="P2P Transfer">Peer to Peer / Personal</option>
+                  <option value="Bills & Utilities">Bills & Utilities</option>
+                  <option value="Business">Business Vendor Settlement</option>
+                  <option value="Mortgage / Rent">Mortgage / Rent</option>
+                  <option value="Groceries">Shopping & General</option>
+                  <option value="Other">Other Expenses</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="txRemarks">Payment Remarks / Purpose</label>
+              <input type="text" id="txRemarks" class="form-control" placeholder="e.g. Project Invoice #88 or Dinner split">
+            </div>
+
+            <!-- Summary Box before submitting -->
+            <div style="background: var(--bg-card-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem;">
+              <div class="flex justify-between" style="font-size: 0.85rem; margin-bottom: 4px;">
+                <span style="color: var(--text-muted);">Transfer Amount:</span>
+                <span style="font-weight: 700;" id="previewTxAmount">$0.00</span>
+              </div>
+              <div class="flex justify-between" style="font-size: 0.85rem; margin-bottom: 4px;">
+                <span style="color: var(--text-muted);">Processing Fee:</span>
+                <span style="font-weight: 600; color: var(--success);">$0.00 (Waived)</span>
+              </div>
+              <div class="flex justify-between" style="font-size: 0.92rem; font-weight: 800; border-top: 1px dashed var(--border-color); padding-top: 6px; margin-top: 6px;">
+                <span>Total Debit:</span>
+                <span style="color: var(--danger);" id="previewTxTotalDebit">$0.00</span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m5 12 5 5L20 7"/>
+              </svg>
+              Confirm and Initiate Transfer
+            </button>
+          </form>
+        </div>
+
+        <!-- Transfer Guidelines & Recent Beneficiaries -->
+        <div class="flex flex-col gap-4">
+          
+          <!-- Quick Beneficiaries -->
+          <div class="card">
+            <div class="card-title-bar">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>
+                </svg>
+                Frequent Beneficiaries
+              </h3>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; background: var(--bg-card-subtle); border-radius: var(--radius-md); cursor: pointer;" onclick="quickFillBeneficiary('David K. Miller', '5544332211', 'APEX000844')">
+                <div class="flex items-center gap-2">
+                  <div class="user-avatar-circle" style="width: 32px; height: 32px; font-size: 0.75rem;">DM</div>
+                  <div>
+                    <strong style="font-size: 0.85rem; display: block;">David K. Miller</strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">ACC: 5544332211</span>
+                  </div>
+                </div>
+                <span class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.75rem;">Select</span>
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; background: var(--bg-card-subtle); border-radius: var(--radius-md); cursor: pointer;" onclick="quickFillBeneficiary('Elena Rostova', '8839201944', 'APEX000312')">
+                <div class="flex items-center gap-2">
+                  <div class="user-avatar-circle" style="width: 32px; height: 32px; font-size: 0.75rem;">ER</div>
+                  <div>
+                    <strong style="font-size: 0.85rem; display: block;">Elena Rostova</strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">ACC: 8839201944</span>
+                  </div>
+                </div>
+                <span class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.75rem;">Select</span>
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; background: var(--bg-card-subtle); border-radius: var(--radius-md); cursor: pointer;" onclick="quickFillBeneficiary('Cloud Infrastructure Hosting', '9928172635', 'APEX000199')">
+                <div class="flex items-center gap-2">
+                  <div class="user-avatar-circle" style="width: 32px; height: 32px; font-size: 0.75rem; background: #0284c7;">CI</div>
+                  <div>
+                    <strong style="font-size: 0.85rem; display: block;">Cloud Infra Hosting Inc</strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">ACC: 9928172635</span>
+                  </div>
+                </div>
+                <span class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.75rem;">Select</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Banking Security Banner -->
+          <div class="card" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff;">
+            <div class="flex items-center gap-2" style="margin-bottom: 0.75rem;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <h4 style="font-size: 0.95rem; font-weight: 700;">Zero-Fraud Guarantee</h4>
+            </div>
+            <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5;">
+              Every transaction is cryptographically signed and monitored by real-time anomaly detection algorithms. Never share your 2FA OTP or Master Security PIN with anyone.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CUSTOMER VIEW 3: TRANSACTION HISTORY -->
+    <section id="view-transaction-history" class="view-section">
+      <div class="section-headline">
+        <div class="headline-text">
+          <h2>Account Transaction History 📜</h2>
+          <p>Search, filter, and download authenticated banking statements.</p>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-secondary" onclick="exportCustomerTransactionsCSV()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+            </svg>
+            Export to CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+        <div class="filter-bar" style="margin-bottom: 0;">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text" id="custTxSearch" class="form-control" placeholder="Search by party, remarks, or TXN ID..." oninput="filterCustomerTransactions()">
+          </div>
+
+          <div class="flex gap-2" style="flex-wrap: wrap;">
+            <select id="custTxTypeFilter" class="form-control" style="width: auto; min-width: 150px;" onchange="filterCustomerTransactions()">
+              <option value="ALL">All Categories</option>
+              <option value="debit">Debits (Money Out)</option>
+              <option value="credit">Credits (Money In)</option>
+              <option value="Transfer">Transfers</option>
+              <option value="Deposit">Deposits</option>
+              <option value="Card Purchase">Card Purchases</option>
+            </select>
+
+            <select id="custTxSort" class="form-control" style="width: auto;" onchange="filterCustomerTransactions()">
+              <option value="newest">Sort: Newest First</option>
+              <option value="oldest">Sort: Oldest First</option>
+              <option value="amount-high">Amount: High to Low</option>
+              <option value="amount-low">Amount: Low to High</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Full Table -->
+      <div class="card">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Reference ID</th>
+                <th>Date & Time</th>
+                <th>Counterparty / Description</th>
+                <th>Channel / Network</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th style="text-align: right;">Amount</th>
+                <th style="text-align: center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="customerTxFullTable">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+        <div id="noCustTxNotice" style="display: none; padding: 3rem; text-align: center; color: var(--text-muted);">
+          No matching transactions found with current filters.
+        </div>
+      </div>
+    </section>
+
+    <!-- CUSTOMER VIEW 4: ACCESS BANKING SERVICES -->
+    <section id="view-banking-services" class="view-section">
+      <div class="section-headline">
+        <div class="headline-text">
+          <h2>Banking Services & Wealth Management 🏛️</h2>
+          <p>Apply for competitive loans, open high-yield deposits, and manage credit facilities.</p>
+        </div>
+      </div>
+
+      <!-- Sub Tabs for Banking Services -->
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+        <button id="serviceTabBtnLoans" class="btn btn-primary btn-sm" onclick="toggleServiceSubView('loans')">
+          Personal & Home Loans
+        </button>
+        <button id="serviceTabBtnInv" class="btn btn-secondary btn-sm" onclick="toggleServiceSubView('investments')">
+          Fixed Deposits & Wealth
+        </button>
+        <button id="serviceTabBtnApp" class="btn btn-secondary btn-sm" onclick="toggleServiceSubView('applications')">
+          My Active Applications (<span id="activeAppBadgeCount">2</span>)
+        </button>
+      </div>
+
+      <!-- SERVICE SUBVIEW: LOANS -->
+      <div id="serviceSubViewLoans">
+        
+        <!-- Loan Calculator & Loan Cards Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+          
+          <!-- Interactive EMI Calculator -->
+          <div class="card calc-card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem;">
+              🧮 Interactive Loan EMI Calculator
+            </h3>
+
+            <div class="form-group">
+              <div class="flex justify-between">
+                <label class="form-label">Loan Amount ($)</label>
+                <span style="font-weight: 700; color: var(--primary);" id="emiAmountVal">$25,000</span>
+              </div>
+              <input type="range" id="emiAmountRange" min="1000" max="200000" step="1000" value="25000" style="width: 100%;" oninput="calculateEMI()">
+            </div>
+
+            <div class="form-group">
+              <div class="flex justify-between">
+                <label class="form-label">Tenure (Months)</label>
+                <span style="font-weight: 700; color: var(--primary);" id="emiTenureVal">36 Months (3 Years)</span>
+              </div>
+              <input type="range" id="emiTenureRange" min="12" max="120" step="6" value="36" style="width: 100%;" oninput="calculateEMI()">
+            </div>
+
+            <div class="form-group">
+              <div class="flex justify-between">
+                <label class="form-label">Interest Rate (% APR)</label>
+                <span style="font-weight: 700; color: var(--primary);" id="emiRateVal">8.50%</span>
+              </div>
+              <input type="range" id="emiRateRange" min="5" max="18" step="0.25" value="8.5" style="width: 100%;" oninput="calculateEMI()">
+            </div>
+
+            <!-- Calculated Output Box -->
+            <div class="calc-result-box" style="margin-top: 1.5rem;">
+              <span style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.85;">Estimated Monthly Installment (EMI)</span>
+              <div class="calc-result-amount" id="emiCalculatedMonthly">$789.24</div>
+              <div class="flex justify-between" style="font-size: 0.8rem; opacity: 0.85; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 8px; margin-top: 8px;">
+                <span>Total Interest: <strong id="emiTotalInterest">$3,412.64</strong></span>
+                <span>Total Payable: <strong id="emiTotalPayable">$28,412.64</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Available Loan Products -->
+          <div class="flex flex-col gap-3">
+            <div class="card" style="border-left: 4px solid #3b82f6;">
+              <div class="flex justify-between items-center" style="margin-bottom: 0.5rem;">
+                <h4 style="font-size: 1.05rem; font-weight: 700;">Express Personal Loan</h4>
+                <span class="badge badge-active">Instant Approval</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                Collateral-free financing up to $50,000 with 100% digital KYC and immediate disbursement.
+              </p>
+              <div class="flex justify-between" style="font-size: 0.82rem; margin-bottom: 1rem; background: var(--bg-card-subtle); padding: 8px; border-radius: var(--radius-sm);">
+                <span>APR: <strong>8.99% p.a.</strong></span>
+                <span>Tenure: <strong>12-60 Mos</strong></span>
+                <span>Processing: <strong>$0 Fee</strong></span>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openApplyLoanModal('Express Personal Loan', 8.99, 50000)">
+                Apply for Personal Loan
+              </button>
+            </div>
+
+            <div class="card" style="border-left: 4px solid #10b981;">
+              <div class="flex justify-between items-center" style="margin-bottom: 0.5rem;">
+                <h4 style="font-size: 1.05rem; font-weight: 700;">Apex Prime Home Mortgage</h4>
+                <span class="badge" style="background: #e0f2fe; color: #0369a1;">Lowest APR</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                Low interest mortgage up to $1,000,000 for acquiring, building, or refinancing property.
+              </p>
+              <div class="flex justify-between" style="font-size: 0.82rem; margin-bottom: 1rem; background: var(--bg-card-subtle); padding: 8px; border-radius: var(--radius-sm);">
+                <span>APR: <strong>6.45% p.a.</strong></span>
+                <span>Tenure: <strong>Up to 30 Yrs</strong></span>
+                <span>Prepayment: <strong>Nil</strong></span>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openApplyLoanModal('Apex Prime Home Mortgage', 6.45, 1000000)">
+                Apply for Home Loan
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SERVICE SUBVIEW: INVESTMENTS -->
+      <div id="serviceSubViewInvestments" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+          
+          <!-- Fixed Deposit Card -->
+          <div class="card">
+            <div class="badge badge-active" style="margin-bottom: 0.75rem;">Government Guaranteed</div>
+            <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem;">Fixed Growth Term Deposit</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Lock your surplus liquidity for 1 to 5 years at an assured fixed compound rate of 7.25% p.a.
+            </p>
+            <div style="background: #eff6ff; border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+              <div style="font-size: 1.75rem; font-weight: 800; color: #1e40af;">7.25% <span style="font-size: 0.85rem; font-weight: 600;">p.a.</span></div>
+              <span style="font-size: 0.78rem; color: #3b82f6;">Senior citizens get an extra +0.50% boost</span>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="openOpenFdModal()">
+              Open Fixed Deposit Now
+            </button>
+          </div>
+
+          <!-- Mutual Fund SIP Card -->
+          <div class="card">
+            <div class="badge" style="background: #fdf2f8; color: #db2777; margin-bottom: 0.75rem;">Wealth Creation</div>
+            <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem;">Apex Global Bluechip Basket</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Systematic Investment Plan (SIP) in top Fortune 500 equities with automated monthly debits.
+            </p>
+            <div style="background: #fdf2f8; border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+              <div style="font-size: 1.75rem; font-weight: 800; color: #9d174d;">14.80% <span style="font-size: 0.85rem; font-weight: 600;">3-Year Historical CAGR</span></div>
+              <span style="font-size: 0.78rem; color: #be185d;">Zero exit load after 365 days</span>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%;" onclick="openSipModal()">
+              Start Automated SIP ($100/mo)
+            </button>
+          </div>
+
+          <!-- Retirement Pension -->
+          <div class="card">
+            <div class="badge" style="background: #fef3c7; color: #b45309; margin-bottom: 0.75rem;">Tax Saver 80CCD</div>
+            <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem;">Golden Sovereign Pension</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Build a lifelong guaranteed pension with 100% tax write-offs and government sovereign security.
+            </p>
+            <div style="background: #fffbeb; border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+              <div style="font-size: 1.75rem; font-weight: 800; color: #92400e;">9.10% <span style="font-size: 0.85rem; font-weight: 600;">Compounded Annually</span></div>
+              <span style="font-size: 0.78rem; color: #b45309;">Annuity payouts commence at 60</span>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%;" onclick="openPensionModal()">
+              Enroll in Pension Fund
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SERVICE SUBVIEW: APPLICATIONS -->
+      <div id="serviceSubViewApplications" style="display: none;">
+        <div class="card">
+          <div class="card-title-bar">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+              My Submitted Banking Service Requests
+            </h3>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Application Ref</th>
+                  <th>Service Type</th>
+                  <th>Date Submitted</th>
+                  <th>Amount / Principal</th>
+                  <th>Tenure</th>
+                  <th>Status</th>
+                  <th>Remarks / Action</th>
+                </tr>
+              </thead>
+              <tbody id="appliedServicesTable">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- CUSTOMER VIEW 5: PROFILE MANAGEMENT -->
+    <section id="view-profile-management" class="view-section">
+      <div class="section-headline">
+        <div class="headline-text">
+          <h2>Profile & Security Management 🛡️</h2>
+          <p>Update personal contact credentials, security password, and notification preferences.</p>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
+        
+        <!-- Personal Details Form -->
+        <div class="card">
+          <div class="card-title-bar">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+              Personal Details & Contact
+            </h3>
+          </div>
+          <form id="profileForm" onsubmit="handleProfileUpdate(event)">
+            
+            <div class="form-group">
+              <label class="form-label" for="profileName">Full Name *</label>
+              <input type="text" id="profileName" class="form-control" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="profileEmail">Email Address *</label>
+                <input type="email" id="profileEmail" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profilePhone">Phone Number *</label>
+                <input type="tel" id="profilePhone" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profileAddress">Permanent Residential Address</label>
+              <textarea id="profileAddress" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Primary Account Number</label>
+                <input type="text" id="profileAccountNum" class="form-control" readonly style="background: #f1f5f9;">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Customer ID</label>
+                <input type="text" id="profileCustomerId" class="form-control" readonly style="background: #f1f5f9;">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">
+              Save Contact Changes
+            </button>
+          </form>
+        </div>
+
+        <!-- Security & Credentials -->
+        <div class="card">
+          <div class="card-title-bar">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Security Credentials & 2FA
+            </h3>
+          </div>
+          <form id="securityForm" onsubmit="handleSecurityUpdate(event)">
+            
+            <div class="form-group">
+              <label class="form-label" for="currentPassword">Current Password</label>
+              <input type="password" id="currentPassword" class="form-control" placeholder="••••••••••••" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="newPassword">New Password</label>
+                <input type="password" id="newPassword" class="form-control" placeholder="Minimum 8 characters" required minlength="8">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" class="form-control" placeholder="Re-enter password" required minlength="8">
+              </div>
+            </div>
+
+            <div style="background: var(--bg-card-subtle); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+              <div class="flex justify-between items-center" style="margin-bottom: 0.75rem;">
+                <div>
+                  <strong style="font-size: 0.88rem; display: block;">Two-Factor Authentication (2FA)</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Require OTP code on unrecognized device logins</span>
+                </div>
+                <input type="checkbox" id="twoFactorCheckbox" checked style="width: 18px; height: 18px; accent-color: var(--primary);">
+              </div>
+
+              <div class="flex justify-between items-center">
+                <div>
+                  <strong style="font-size: 0.88rem; display: block;">SMS & Email Transaction Alerts</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Real-time debit notifications via SMS</span>
+                </div>
+                <input type="checkbox" id="smsAlertsCheckbox" checked style="width: 18px; height: 18px; accent-color: var(--primary);">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-secondary">
+              Update Security Credentials
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ***********************************************************************
+         ADMIN VIEWS
+         *********************************************************************** -->
+
+    <!-- ADMIN VIEW 1: OPERATIONAL METRICS -->
+    <section id="view-admin-metrics" class="view-section">
+      <div class="section-headline">
+        <div class="headline-text">
+          <h2>Core Banking Operational Metrics 📊</h2>
+          <p>Real-time analytics on bank liquidity, transaction velocity, and infrastructure health.</p>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-secondary btn-sm" onclick="refreshAdminMetrics()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/>
+            </svg>
+            Refresh Telemetry
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="accounts-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 2rem;">
+        
+        <div class="card">
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Bank Deposits</span>
+          <div style="font-size: 1.85rem; font-weight: 800; color: #1e40af; margin: 4px 0;" id="metricTotalDeposits">$4.85M</div>
+          <span style="font-size: 0.75rem; color: var(--success); font-weight: 600;">↑ +14.2% month-on-month</span>
+        </div>
+
+        <div class="card">
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Active Customer Accounts</span>
+          <div style="font-size: 1.85rem; font-weight: 800; color: #0f172a; margin: 4px 0;" id="metricTotalUsersCount">14,280</div>
+          <span style="font-size: 0.75rem; color: var(--success); font-weight: 600;">↑ 98.4% KYC Verified</span>
+        </div>
+
+        <div class="card">
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Core System Uptime</span>
+          <div style="font-size: 1.85rem; font-weight: 800; color: #10b981; margin: 4px 0;">99.98%</div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Zero unscheduled downtime</span>
+        </div>
+
+        <div class="card">
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Transaction Velocity / API</span>
+          <div style="font-size: 1.85rem; font-weight: 800; color: #0284c7; margin: 4px 0;">42 ms</div>
+          <span style="font-size: 0.75rem; color: var(--success); font-weight: 600;">Avg response latency</span>
+        </div>
+
+      </div>
+
+      <!-- Charts Row -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        
+        <!-- Transaction Volume Line Chart -->
+        <div class="card">
+          <div class="card-title-bar">
+            <h3>Monthly Transaction Volume ($ Millions)</h3>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Trailing 6 Months</span>
+          </div>
+          <div style="height: 260px; position: relative;">
+            <canvas id="chartTxVolume"></canvas>
+          </div>
+        </div>
+
+        <!-- Portfolio Distribution Doughnut Chart -->
+        <div class="card">
+          <div class="card-title-bar">
+            <h3>Account Types Distribution</h3>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Portfolio Ratio</span>
+          </div>
+          <div style="height: 260px; position: relative;">
+            <canvas id="chartAccountDistribution"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- System Health & Live Audit Stream -->
+      <div class="card">
+        <div class="card-title-bar">
+          <h3>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            System Security & Real-Time Operational Log
+          </h3>
+          <span class="badge badge-active">Audit Feed Live</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;" id="adminAuditLogFeed">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 8px 12px; background: var(--bg-card-subtle); border-radius: var(--radius-sm);">
+            <span>🛡️ Automated Fraud Scan completed across <strong>46,500 records</strong>. 0 unauthorized attempts.</span>
+            <span style="color: var(--text-muted); font-size: 0.78rem;">Just now</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 8px 12px; background: var(--bg-card-subtle); border-radius: var(--radius-sm);">
+            <span>⚡ CoreBanking Microservice cluster autoscaled to <strong>12 nodes</strong>. Health normal.</span>
+            <span style="color: var(--text-muted); font-size: 0.78rem;">14 mins ago</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 8px 12px; background: var(--bg-card-subtle); border-radius: var(--radius-sm);">
+            <span>🏦 Federal Clearing House batch settlement synchronized ($1.2M inward).</span>
+            <span style="color: var(--text-muted); font-size: 0.78rem;">42 mins ago</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN VIEW 2: USER MANAGEMENT -->
+    <section id="view-admin-users" class="view-section">
+      <div class="section-headline">
+        <div class="headline-text">
+          <h2>User & Customer Account Management 👥</h2>
+          <p>Create, update, activate, suspend, or delete banking accounts and administrative roles.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openCreateUserModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/>
+          </svg>
+          Add New User
+        </button>
+      </div>
+
+      <!-- User Filters -->
+      <div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+        <div class="filter-bar" style="margin-bottom: 0;">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text" id="adminUserSearch" class="form-control" placeholder="Search by name, email, or user ID..." oninput="filterAdminUsers()">
+          </div>
+
+          <div class="flex gap-2">
+            <select id="adminUserRoleFilter" class="form-control" style="width: auto;" onchange="filterAdminUsers()">
+              <option value="ALL">All Roles</option>
+              <option value="customer">Customers</option>
+              <option value="admin">Administrators</option>
+            </select>
+
+            <select id="adminUserStatusFilter" class="form-control" style="width: auto;" onchange="filterAdminUsers()">
+              <option value="ALL">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Management Table -->
+      <div class="card">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Email Address</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Created Date</th>
+                <th>Balance</th>
+                <th style="text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminUserTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN VIEW 3: TRANSACTION MONITORING -->
+    <section id="view-admin-transactions" class="view-section">
+      <div class="section-headline">
+        <div class="headline-text">
+          <h2>Transaction Monitoring & Compliance 🔎</h2>
+          <p>Inspect bank-wide payment flows, generate transaction audits, and print compliance reports.</p>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-secondary" onclick="generateTransactionAuditReport()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Generate Transaction Report
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+        <div class="filter-bar" style="margin-bottom: 0;">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text" id="adminTxSearch" class="form-control" placeholder="Search by TXN ID, sender, recipient, remarks..." oninput="filterAdminTransactions()">
+          </div>
+
+          <div class="flex gap-2" style="flex-wrap: wrap;">
+            <select id="adminTxChannelFilter" class="form-control" style="width: auto;" onchange="filterAdminTransactions()">
+              <option value="ALL">All Payment Channels</option>
+              <option value="Web Banking">Web Banking</option>
+              <option value="IMPS Fast Transfer">IMPS</option>
+              <option value="NEFT Transfer">NEFT</option>
+              <option value="RTGS High-Value">RTGS</option>
+              <option value="Debit Card">Debit Card</option>
+            </select>
+
+            <select id="adminTxStatusFilter" class="form-control" style="width: auto;" onchange="filterAdminTransactions()">
+              <option value="ALL">All Statuses</option>
+              <option value="Completed">Completed</option>
+              <option value="Pending">Pending</option>
+              <option value="Failed">Failed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank-wide Transactions Table -->
+      <div class="card">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>TXN Ref</th>
+                <th>Timestamp</th>
+                <th>Sender</th>
+                <th>Recipient / Party</th>
+                <th>Channel</th>
+                <th>Status</th>
+                <th style="text-align: right;">Amount</th>
+                <th style="text-align: center;">Audit & Receipt</th>
+              </tr>
+            </thead>
+            <tbody id="adminTxTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN VIEW 4: SYSTEM SETTINGS -->
+    <section id="view-admin-settings" class="view-section">
+      <div class="section-headline">
+        <div class="headline-text">
+          <h2>Core System Configurations ⚙️</h2>
+          <p>Configure bank-wide policies, transfer limits, benchmark interest rates, and security thresholds.</p>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
+        
+        <!-- General Bank Parameters -->
+        <div class="card">
+          <div class="card-title-bar">
+            <h3>General Banking Parameters</h3>
+          </div>
+          <form id="systemSettingsForm" onsubmit="handleSaveSystemSettings(event)">
+            
+            <div class="form-group">
+              <label class="form-label" for="settingBankName">Financial Institution Name</label>
+              <input type="text" id="settingBankName" class="form-control" value="ApexTrust Commercial Bank" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="settingBankCode">SWIFT / Bank Identifier</label>
+                <input type="text" id="settingBankCode" class="form-control" value="APEX-GLOBAL-01">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="settingCurrency">Operating Currency Symbol</label>
+                <select id="settingCurrency" class="form-control">
+                  <option value="$">USD ($)</option>
+                  <option value="€">EUR (€)</option>
+                  <option value="₹">INR (₹)</option>
+                  <option value="£">GBP (£)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="settingDailyLimit">Daily Transfer Limit ($)</label>
+                <input type="number" id="settingDailyLimit" class="form-control" value="50000" min="1000">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="settingTxLimit">Per-Transaction Cap ($)</label>
+                <input type="number" id="settingTxLimit" class="form-control" value="15000" min="500">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="settingSavingsRate">Savings Base Interest Rate (%)</label>
+                <input type="number" id="settingSavingsRate" class="form-control" value="4.25" step="0.05" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="settingLoanRate">Loan Benchmark Base Rate (%)</label>
+                <input type="number" id="settingLoanRate" class="form-control" value="8.50" step="0.05" min="0">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="settingSystemNotice">Public Banner Notice</label>
+              <input type="text" id="settingSystemNotice" class="form-control" value="System upgraded to CoreBanking v4.12. All services fully operational.">
+            </div>
+
+            <!-- Maintenance Mode & Security Toggles -->
+            <div style="background: var(--bg-card-subtle); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+              <div class="flex justify-between items-center" style="margin-bottom: 0.75rem;">
+                <div>
+                  <strong style="font-size: 0.88rem; display: block;">System Maintenance Mode</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Temporarily restrict outgoing customer transactions</span>
+                </div>
+                <input type="checkbox" id="settingMaintenanceMode" style="width: 18px; height: 18px; accent-color: var(--danger);">
+              </div>
+
+              <div class="flex justify-between items-center">
+                <div>
+                  <strong style="font-size: 0.88rem; display: block;">Mandatory 2FA Enforcement</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Enforce 2FA on all administrator and customer sessions</span>
+                </div>
+                <input type="checkbox" id="settingTwoFactorEnforced" checked style="width: 18px; height: 18px; accent-color: var(--primary);">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Save System Settings
+            </button>
+          </form>
+        </div>
+
+        <!-- System Architecture & Environment Info -->
+        <div class="card">
+          <div class="card-title-bar">
+            <h3>Infrastructure & Security Status</h3>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+              <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Database Engine</span>
+              <div style="font-weight: 600; font-size: 0.95rem; margin-top: 2px;">ApexCloud Distributed Ledger (ACID Compliant)</div>
+              <span style="font-size: 0.75rem; color: var(--success);">● Active & Synchronized</span>
+            </div>
+
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+              <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Encryption Protocol</span>
+              <div style="font-weight: 600; font-size: 0.95rem; margin-top: 2px;">AES-256 GCM + RSA 4096-bit Handshake</div>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">FIPS 140-3 Level 3 Validated</span>
+            </div>
+
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+              <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Regulatory Compliance</span>
+              <div style="font-weight: 600; font-size: 0.95rem; margin-top: 2px;">PCI-DSS Level 1 • SOC 2 Type II • ISO 27001</div>
+              <span style="font-size: 0.75rem; color: var(--success);">● Fully Compliant</span>
+            </div>
+
+            <div style="padding-top: 0.5rem;">
+              <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="runSecurityAuditDiagnostic()">
+                Run Diagnostic System Audit
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================================
+       MODALS
+       ========================================================================= -->
+
+  <!-- MODAL: ADD / EDIT USER (ADMIN) -->
+  <div id="userModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="userModalTitle">Add New Banking User</h3>
+        <button class="modal-close-btn" onclick="closeModal('userModal')">&times;</button>
+      </div>
+      <form id="userModalForm" onsubmit="handleUserModalSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="modalUserId">
+
+          <div class="form-group">
+            <label class="form-label" for="modalUserName">Full Legal Name *</label>
+            <input type="text" id="modalUserName" class="form-control" placeholder="e.g. Johnathan Vance" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="modalUserEmail">Email Address *</label>
+              <input type="email" id="modalUserEmail" class="form-control" placeholder="user@example.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modalUserPhone">Phone Number</label>
+              <input type="text" id="modalUserPhone" class="form-control" placeholder="+1 555-0192">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="modalUserRole">Account Role *</label>
+              <select id="modalUserRole" class="form-control" required>
+                <option value="customer">Customer</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modalUserStatus">Account Status</label>
+              <select id="modalUserStatus" class="form-control">
+                <option value="Active">Active</option>
+                <option value="Suspended">Suspended</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" id="modalBalanceGroup">
+            <label class="form-label" for="modalUserBalance">Initial Account Balance ($)</label>
+            <input type="number" id="modalUserBalance" class="form-control" placeholder="1000.00" min="0" step="0.01">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('userModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modalUserSubmitBtn">Create User Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: TRANSACTION CONFIRMATION & RECEIPT -->
+  <div id="receiptModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 id="receiptModalTitle">Transaction Confirmation</h3>
+        <button class="modal-close-btn" onclick="closeModal('receiptModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="receipt-paper" id="printableReceipt">
+          <div class="receipt-header">
+            <strong style="font-size: 1.15rem; display: block; letter-spacing: 1px;">APEXTRUST COMMERCIAL BANK</strong>
+            <span style="font-size: 0.75rem; color: #64748b;">OFFICIAL TRANSACTION ADVICE / RECEIPT</span>
+          </div>
+
+          <div class="receipt-row">
+            <span>TXN Reference:</span>
+            <strong id="receiptTxId">TXN-90481</strong>
+          </div>
+          <div class="receipt-row">
+            <span>Date & Time:</span>
+            <span id="receiptTimestamp">Oct 8, 2026 09:42 AM</span>
+          </div>
+          <div class="receipt-row">
+            <span>Payment Method:</span>
+            <span id="receiptChannel">Instant IMPS</span>
+          </div>
+          <div class="receipt-row">
+            <span>Sender Account:</span>
+            <span id="receiptSourceAcc">1029384756</span>
+          </div>
+          <div class="receipt-row">
+            <span>Beneficiary:</span>
+            <strong id="receiptRecipientName">David K. Miller</strong>
+          </div>
+          <div class="receipt-row">
+            <span>Beneficiary Account:</span>
+            <span id="receiptRecipientAcc">5544332211</span>
+          </div>
+          <div class="receipt-row">
+            <span>Purpose / Note:</span>
+            <span id="receiptRemarks">Consultation Advance</span>
+          </div>
+
+          <div class="receipt-total receipt-row">
+            <span>TOTAL DEBITED:</span>
+            <span id="receiptAmount">$750.00</span>
+          </div>
+
+          <div style="text-align: center; font-size: 0.72rem; color: #64748b; margin-top: 1rem;">
+            Status: <strong style="color: #10b981;">COMPLETED / AUTHORIZED</strong><br>
+            Digitally signed by ApexCore Gateway • Thank you for banking with us.
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="printReceiptContent()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>
+          </svg>
+          Print Receipt
+        </button>
+        <button type="button" class="btn btn-primary" onclick="closeModal('receiptModal')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: APPLY FOR LOAN -->
+  <div id="loanModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="loanModalTitle">Apply for Personal Loan</h3>
+        <button class="modal-close-btn" onclick="closeModal('loanModal')">&times;</button>
+      </div>
+      <form id="loanApplyForm" onsubmit="handleLoanApplicationSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="loanProductType" value="Personal Loan">
+          <input type="hidden" id="loanInterestRate" value="8.99">
+
+          <div class="form-group">
+            <label class="form-label" for="loanApplicantName">Applicant Name</label>
+            <input type="text" id="loanApplicantName" class="form-control" readonly style="background: #f1f5f9;">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="loanAmountInput">Requested Amount ($) *</label>
+              <input type="number" id="loanAmountInput" class="form-control" value="15000" min="1000" max="500000" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="loanTenureInput">Tenure (Months) *</label>
+              <select id="loanTenureInput" class="form-control">
+                <option value="12">12 Months (1 Year)</option>
+                <option value="24">24 Months (2 Years)</option>
+                <option value="36" selected>36 Months (3 Years)</option>
+                <option value="48">48 Months (4 Years)</option>
+                <option value="60">60 Months (5 Years)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="loanMonthlyIncome">Monthly Net Income ($) *</label>
+              <input type="number" id="loanMonthlyIncome" class="form-control" placeholder="e.g. 5500" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="loanEmploymentType">Employment Category</label>
+              <select id="loanEmploymentType" class="form-control">
+                <option value="Salaried">Salaried Professional</option>
+                <option value="Self-Employed">Self-Employed / Business</option>
+                <option value="Professional">Doctor / Consultant / Legal</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loanPurposeText">Financing Purpose / Comments</label>
+            <input type="text" id="loanPurposeText" class="form-control" placeholder="e.g. Home renovation, wedding, higher education">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('loanModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: OPEN FIXED DEPOSIT -->
+  <div id="fdModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Open Fixed Term Deposit</h3>
+        <button class="modal-close-btn" onclick="closeModal('fdModal')">&times;</button>
+      </div>
+      <form id="fdApplyForm" onsubmit="handleFdApplicationSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="fdDepositAmount">Deposit Principal Amount ($) *</label>
+            <input type="number" id="fdDepositAmount" class="form-control" placeholder="5000" min="500" required>
+            <span class="form-hint">Deducted from your Primary Checking Account</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="fdTenureSelect">Tenure & Compounding Schedule *</label>
+            <select id="fdTenureSelect" class="form-control">
+              <option value="12">12 Months @ 6.80% p.a.</option>
+              <option value="24" selected>24 Months @ 7.25% p.a. (Recommended)</option>
+              <option value="36">36 Months @ 7.50% p.a.</option>
+              <option value="60">60 Months @ 7.75% p.a.</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="fdAutoRenew">Maturity Action</label>
+            <select id="fdAutoRenew" class="form-control">
+              <option value="Credit checking account">Credit Checking Account on Maturity</option>
+              <option value="Auto-renew principal and interest">Auto-Renew Principal + Accrued Interest</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('fdModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Authorize & Open FD</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DEPOSIT FUNDS -->
+  <div id="depositModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Deposit Funds into Account</h3>
+        <button class="modal-close-btn" onclick="closeModal('depositModal')">&times;</button>
+      </div>
+      <form id="depositFundsForm" onsubmit="handleDepositSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="depositAccountSelect">Destination Account</label>
+            <select id="depositAccountSelect" class="form-control">
+              <option value="Checking">Apex Privilege Checking (•••• 4756)</option>
+              <option value="Savings">High-Yield Wealth Growth (•••• 4799)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="depositAmountInput">Deposit Amount ($) *</label>
+            <input type="number" id="depositAmountInput" class="form-control" placeholder="1000.00" min="10" step="0.01" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="depositSourceSelect">Payment Channel</label>
+            <select id="depositSourceSelect" class="form-control">
+              <option value="Direct ACH Transfer">Instant Direct ACH Transfer</option>
+              <option value="Electronic Check Capture">e-Check Remote Deposit</option>
+              <option value="Wire Transfer">Incoming Wire Transfer</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('depositModal')">Cancel</button>
+          <button type="submit" class="btn btn-success">Complete Deposit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: QUICK LOGIN / SWITCH USER -->
+  <div id="loginModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>Switch / Login Active User</h3>
+        <button class="modal-close-btn" onclick="closeModal('loginModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Select a role or user persona to test real-time banking workflows:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; transition: var(--transition);" onclick="loginAsPreset('customer', 'CUST-1001')">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="user-avatar-circle">HM</div>
+                <div>
+                  <strong style="font-size: 0.95rem; display: block;">Harshit Malik</strong>
+                  <span style="font-size: 0.78rem; color: var(--text-muted);">Customer • Privilege Checking</span>
+                </div>
+              </div>
+              <span class="badge badge-customer">Login as Customer</span>
+            </div>
+          </div>
+
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; transition: var(--transition);" onclick="loginAsPreset('admin', 'ADMIN-001')">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="user-avatar-circle admin">AK</div>
+                <div>
+                  <strong style="font-size: 0.95rem; display: block;">Aakash Kumar</strong>
+                  <span style="font-size: 0.78rem; color: var(--text-muted);">Administrator • Central Security</span>
+                </div>
+              </div>
+              <span class="badge badge-admin">Login as Admin</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER FOR NOTIFICATIONS -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- FOOTER -->
+  <footer class="main-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>ApexTrust Commercial Banking System</strong> &bull; CoreBanking Engine v4.12
+        <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 2px;">
+          Designed for GUVI Geek Network Pvt. Ltd. Capstone Implementation.
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>© 2024 GUVI Geek Network Pvt. Ltd. All rights reserved.</span>
+        <span>•</span>
+        <a href="#" onclick="showTerms(); return false;" style="color: var(--accent); text-decoration: none;">Security & Privacy</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Auto-switch role based on login session from login.html
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roleParam = urlParams.get('role');
+      const session = localStorage.getItem('apextrust_session');
+
+      if (roleParam === 'admin' || (session && JSON.parse(session).role === 'admin' && roleParam !== 'customer')) {
+        // Switch to admin after app initialises
+        setTimeout(() => switchRole('admin'), 100);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexTrust Bank — Secure Login</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #1e40af;
+      --accent: #0284c7;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 20px 40px -10px rgba(0,0,0,0.18);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0369a1 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background geometric decorations */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    body::after {
+      content: '';
+      position: absolute;
+      bottom: -120px;
+      left: -80px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(3,105,161,0.3) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 960px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #ffffff;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      position: relative;
+      z-index: 1;
+      min-height: 580px;
+    }
+
+    /* LEFT PANEL — Brand */
+    .brand-panel {
+      background: linear-gradient(160deg, #0f172a 0%, #1e3a8a 60%, #0284c7 100%);
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .brand-panel::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: -40px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(3,105,161,0.4) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .bank-logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-circle {
+      width: 52px;
+      height: 52px;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+
+    .logo-name h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-name span {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.65);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .brand-headline {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-headline h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 1rem;
+    }
+
+    .brand-headline p {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.65;
+      margin-bottom: 2rem;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .feature-list li::before {
+      content: '✓';
+      width: 20px;
+      height: 20px;
+      background: rgba(16,185,129,0.25);
+      border: 1px solid rgba(16,185,129,0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #34d399;
+      flex-shrink: 0;
+      padding-left: 5px;
+    }
+
+    .brand-secure-note {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.55);
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding-top: 1.25rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* RIGHT PANEL — Form */
+    .form-panel {
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .form-panel-header {
+      margin-bottom: 2rem;
+    }
+
+    .form-panel-header h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+
+    .form-panel-header p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    /* Role Selector Tabs */
+    .role-tabs {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 1.75rem;
+      gap: 4px;
+    }
+
+    .role-tab {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .role-tab.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+
+    /* Form elements */
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.35rem;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.72rem 0.9rem 0.72rem 38px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text-main);
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+    }
+
+    .form-input.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+    }
+
+    .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #94a3b8;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .toggle-pw:hover { color: var(--text-main); }
+
+    /* Remember / Forgot row */
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      font-size: 0.82rem;
+    }
+
+    .remember-check {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .remember-check input {
+      accent-color: var(--primary);
+      width: 15px;
+      height: 15px;
+    }
+
+    .forgot-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .forgot-link:hover { text-decoration: underline; }
+
+    /* Submit button */
+    .btn-login {
+      width: 100%;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(30, 58, 138, 0.35);
+    }
+
+    .btn-login:active { transform: translateY(0); }
+
+    .btn-login .loader {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Demo credentials */
+    .demo-credentials {
+      margin-top: 1.75rem;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      background: #f8fafc;
+    }
+
+    .demo-credentials h4 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .demo-cred-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .demo-cred-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .demo-cred-item:hover {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .demo-cred-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .demo-cred-email {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .demo-cred-role {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+
+    .role-customer { background: #dcfce7; color: #16a34a; }
+    .role-admin { background: #fdf2f8; color: #db2777; }
+
+    /* Error alert */
+    .alert-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid var(--danger);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.84rem;
+      color: #991b1b;
+      margin-bottom: 1.25rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Success overlay */
+    .success-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.85);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      gap: 1rem;
+    }
+
+    .success-overlay.show { display: flex; }
+
+    .success-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 360px;
+      width: 90%;
+      animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .success-icon {
+      width: 70px;
+      height: 70px;
+      background: #ecfdf5;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 2rem;
+    }
+
+    .success-card h3 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    .success-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-bar-wrap {
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #1e3a8a, #10b981);
+      border-radius: 9999px;
+      transition: width 0.05s linear;
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .login-wrapper { grid-template-columns: 1fr; }
+      .brand-panel { display: none; }
+      .form-panel { padding: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Card -->
+  <div class="login-wrapper">
+
+    <!-- Left: Brand Panel -->
+    <div class="brand-panel">
+      <div class="bank-logo">
+        <div class="logo-circle">AT</div>
+        <div class="logo-name">
+          <h1>ApexTrust Bank</h1>
+          <span>Commercial &amp; Retail Banking</span>
+        </div>
+      </div>
+
+      <div class="brand-headline">
+        <h2>Enterprise-Grade<br>Digital Banking</h2>
+        <p>Manage your wealth, perform real-time fund transfers, and access premium financial services — all from one secure dashboard.</p>
+
+        <ul class="feature-list">
+          <li>Multi-tier account management (Checking, Savings, Investments)</li>
+          <li>Real-time fund transfers (IMPS, NEFT, RTGS)</li>
+          <li>Loan applications with live EMI calculator</li>
+          <li>Zero-fraud guarantee with AES-256 encryption</li>
+          <li>Two-factor authentication on all sessions</li>
+        </ul>
+      </div>
+
+      <div class="brand-secure-note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        256-bit TLS v1.3 encrypted &bull; PCI-DSS Level 1 Certified &bull; ISO 27001
+      </div>
+    </div>
+
+    <!-- Right: Form Panel -->
+    <div class="form-panel">
+      <div class="form-panel-header">
+        <h2>Secure Sign In</h2>
+        <p>Welcome back. Please sign in to access your banking dashboard.</p>
+      </div>
+
+      <!-- Role Selector -->
+      <div class="role-tabs">
+        <button class="role-tab active" id="tabCustomer" onclick="selectRole('customer')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          Customer
+        </button>
+        <button class="role-tab" id="tabAdmin" onclick="selectRole('admin')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          Administrator
+        </button>
+      </div>
+
+      <!-- Error Alert -->
+      <div class="alert-error" id="alertError">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+        </svg>
+        <span id="alertErrorText">Invalid credentials. Please check and try again.</span>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" onsubmit="handleLogin(event)" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="emailInput">Email Address</label>
+          <div class="input-wrap">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+            <input type="email" id="emailInput" class="form-input" placeholder="you@example.com" autocomplete="email" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="passwordInput">Password</label>
+          <div class="input-wrap">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input type="password" id="passwordInput" class="form-input" placeholder="Enter your password" autocomplete="current-password" required>
+            <button type="button" class="toggle-pw" onclick="togglePassword()" id="togglePwBtn">
+              <svg id="eyeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <label class="remember-check">
+            <input type="checkbox" id="rememberMe">
+            Remember me
+          </label>
+          <a href="#" class="forgot-link" onclick="handleForgotPassword(); return false;">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn-login" id="loginBtn">
+          <span id="loginBtnText">Sign In to Banking Portal</span>
+          <div class="loader" id="loginLoader"></div>
+        </button>
+      </form>
+
+      <!-- Demo Credentials Block -->
+      <div class="demo-credentials">
+        <h4>⚡ Demo Credentials — Click to Auto-fill</h4>
+        <div class="demo-cred-grid">
+          <div class="demo-cred-item" onclick="autofill('harshit.malik@example.com', 'Customer@123', 'customer')">
+            <div>
+              <div class="demo-cred-name">Harshit Malik</div>
+              <div class="demo-cred-email">harshit.malik@example.com</div>
+            </div>
+            <span class="demo-cred-role role-customer">Customer</span>
+          </div>
+          <div class="demo-cred-item" onclick="autofill('aakash.kumar@apextrust.com', 'Admin@2024', 'admin')">
+            <div>
+              <div class="demo-cred-name">Aakash Kumar</div>
+              <div class="demo-cred-email">aakash.kumar@apextrust.com</div>
+            </div>
+            <span class="demo-cred-role role-admin">Admin</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Copyright -->
+  <p style="margin-top: 1.5rem; font-size: 0.75rem; color: rgba(255,255,255,0.45); text-align: center; position: relative; z-index: 1;">
+    © 2024 GUVI Geek Network Pvt. Ltd. All rights reserved. &bull; ApexTrust Online Banking System
+  </p>
+
+  <!-- Success Overlay -->
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-card">
+      <div class="success-icon">✅</div>
+      <h3 id="successUserGreet">Welcome, Harshit!</h3>
+      <p id="successSubText">Authentication successful. Redirecting to your banking dashboard...</p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Valid credential pairs
+    const validUsers = {
+      'harshit.malik@example.com': {
+        password: 'Customer@123',
+        role: 'customer',
+        name: 'Harshit Malik',
+        dbRole: 'customer',
+        userId: 'CUST-1001'
+      },
+      'aakash.kumar@apextrust.com': {
+        password: 'Admin@2024',
+        role: 'admin',
+        name: 'Aakash Kumar',
+        dbRole: 'admin',
+        userId: 'ADMIN-001'
+      }
+    };
+
+    let selectedRole = 'customer';
+
+    function selectRole(role) {
+      selectedRole = role;
+      document.getElementById('tabCustomer').classList.toggle('active', role === 'customer');
+      document.getElementById('tabAdmin').classList.toggle('active', role === 'admin');
+
+      // Auto-fill demo credentials when role tab is clicked
+      if (role === 'customer') {
+        autofill('harshit.malik@example.com', 'Customer@123', 'customer');
+      } else {
+        autofill('aakash.kumar@apextrust.com', 'Admin@2024', 'admin');
+      }
+
+      clearError();
+    }
+
+    function autofill(email, password, role) {
+      document.getElementById('emailInput').value = email;
+      document.getElementById('passwordInput').value = password;
+      selectedRole = role;
+      document.getElementById('tabCustomer').classList.toggle('active', role === 'customer');
+      document.getElementById('tabAdmin').classList.toggle('active', role === 'admin');
+      clearError();
+      document.getElementById('emailInput').classList.remove('error');
+      document.getElementById('passwordInput').classList.remove('error');
+    }
+
+    function togglePassword() {
+      const pwInput = document.getElementById('passwordInput');
+      const icon = document.getElementById('eyeIcon');
+      if (pwInput.type === 'password') {
+        pwInput.type = 'text';
+        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" x2="23" y1="1" y2="23"/>';
+      } else {
+        pwInput.type = 'password';
+        icon.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+      }
+    }
+
+    function showError(msg) {
+      const alert = document.getElementById('alertError');
+      document.getElementById('alertErrorText').textContent = msg;
+      alert.style.display = 'flex';
+    }
+
+    function clearError() {
+      document.getElementById('alertError').style.display = 'none';
+    }
+
+    function handleForgotPassword() {
+      alert('Password Reset Link sent!\n\nIn a full system, a secure OTP would be emailed to your registered address.\n\nFor demo access, use the quick-fill credentials below the form.');
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      clearError();
+
+      const email = document.getElementById('emailInput').value.trim().toLowerCase();
+      const password = document.getElementById('passwordInput').value;
+      const emailField = document.getElementById('emailInput');
+      const pwField = document.getElementById('passwordInput');
+
+      // Basic validation
+      if (!email) {
+        emailField.classList.add('error');
+        showError('Please enter your registered email address.');
+        return;
+      }
+      if (!password) {
+        pwField.classList.add('error');
+        showError('Please enter your password.');
+        return;
+      }
+
+      emailField.classList.remove('error');
+      pwField.classList.remove('error');
+
+      // Show loader
+      const btn = document.getElementById('loginBtn');
+      document.getElementById('loginBtnText').style.display = 'none';
+      document.getElementById('loginLoader').style.display = 'block';
+      btn.disabled = true;
+
+      // Simulate network auth delay
+      setTimeout(() => {
+        const user = validUsers[email];
+
+        if (!user || user.password !== password) {
+          document.getElementById('loginBtnText').style.display = 'block';
+          document.getElementById('loginLoader').style.display = 'none';
+          btn.disabled = false;
+          emailField.classList.add('error');
+          pwField.classList.add('error');
+          showError('Incorrect email or password. Please check your credentials and try again.');
+          return;
+        }
+
+        // Store session intent in localStorage
+        localStorage.setItem('apextrust_session', JSON.stringify({
+          email: email,
+          role: user.dbRole,
+          userId: user.userId,
+          name: user.name,
+          loginTime: new Date().toISOString()
+        }));
+
+        // Show success
+        document.getElementById('loginBtnText').style.display = 'block';
+        document.getElementById('loginLoader').style.display = 'none';
+        btn.disabled = false;
+
+        const firstName = user.name.split(' ')[0];
+        document.getElementById('successUserGreet').textContent = `Welcome back, ${firstName}!`;
+        document.getElementById('successSubText').textContent =
+          `Authenticated as ${user.role === 'admin' ? 'System Administrator' : 'Customer'} • Loading your dashboard...`;
+        document.getElementById('successOverlay').classList.add('show');
+
+        // Animate progress bar then redirect
+        let progress = 0;
+        const fill = document.getElementById('progressBarFill');
+        const interval = setInterval(() => {
+          progress += 2;
+          fill.style.width = progress + '%';
+          if (progress >= 100) {
+            clearInterval(interval);
+            // Redirect with intent parameter
+            window.location.href = `index.html?role=${user.dbRole}`;
+          }
+        }, 30);
+
+      }, 1200);
+    }
+
+    // Auto-read URL params on load if coming back
+    window.addEventListener('DOMContentLoaded', () => {
+      // Auto-fill customer by default
+      const emailInput = document.getElementById('emailInput');
+      const pwInput = document.getElementById('passwordInput');
+      if (!emailInput.value) {
+        emailInput.value = 'harshit.malik@example.com';
+        pwInput.value = 'Customer@123';
+      }
+    });
+  </script>
+
+</body>
+</html>
